@@ -1,4 +1,4 @@
-# Collecting streams
+# Streams. Pipelines.
 
 ## Description
 
