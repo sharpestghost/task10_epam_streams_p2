@@ -41,3 +41,6 @@ Example:
     Paige Umberto  |         75 |            94 |         0 |      52 | 55.25 |    F |
     Average        |      45.33 |         89.67 |     52.00 |   37.00 | 56.00 |    F |
     
+    
+## Extra challenge
+Try to use no cycles and no `if` statements.
