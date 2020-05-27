@@ -136,36 +136,41 @@ public class CollectingTest {
         assertEquals(52.166666666666664, new Collecting().averageTotalScore(historyResults(new Random(9821))), 0.001);
     }
 
-    @Test
-    public void testAverageScoresPerTask() {
-        assertEquals(
-                Map.of("Lab 2. War and Peace", 80.66666666666667,
-                        "Lab 1. Figures", 77.66666666666667,
-                        "Lab 3. File Tree", 81.0
-                ),
-                new Collecting().averageScoresPerTask(programmingResults(new Random(969))));
-        assertEquals(
-                Map.of("Lab 2. War and Peace", 67.0,
-                        "Lab 1. Figures", 85.66666666666667,
-                        "Lab 3. File Tree", 68.33333333333333
-                ),
-                new Collecting().averageScoresPerTask(programmingResults(new Random(654))));
-        assertEquals(
-                Map.of("Phalanxing", 51.666666666666664,
-                        "Tercioing", 37.666666666666664,
-                        "Wedging", 40.333333333333336,
-                        "Shieldwalling", 75.66666666666667
-                ),
-                new Collecting().averageScoresPerTask(historyResults(new Random(853))));
-        assertEquals(
-                Map.of("Phalanxing", 44.0,
-                        "Tercioing", 47.333333333333336,
-                        "Wedging", 33.333333333333336,
-                        "Shieldwalling", 83.0
-                ),
-                new Collecting().averageScoresPerTask(historyResults(new Random(753))));
+    public void assertMapEquals(Map<String, Double> expected, Map<String, Double> actual) {
+        for (String key: expected.keySet()) {
+            assertEquals("problem with task " + key, expected.get(key), actual.get(key), 0.0001);
+        }
     }
 
+    @Test
+    public void testAverageScoresPerTask() {
+        Map<String, Double> expected1 = Map.of("Lab 2. War and Peace", 80.66666666666667,
+                "Lab 1. Figures", 77.66666666666667,
+                "Lab 3. File Tree", 81.0
+        );
+        Map<String, Double> received1 = new Collecting().averageScoresPerTask(programmingResults(new Random(969)));
+        assertMapEquals(expected1, received1);
+        Map<String, Double> expected2 = Map.of("Lab 2. War and Peace", 67.0,
+                "Lab 1. Figures", 85.66666666666667,
+                "Lab 3. File Tree", 68.33333333333333
+        );
+        Map<String, Double> received2 = new Collecting().averageScoresPerTask(programmingResults(new Random(654)));
+        assertMapEquals(expected2, received2);
+        Map<String, Double> expected3 = Map.of("Phalanxing", 51.666666666666664,
+                "Tercioing", 37.666666666666664,
+                "Wedging", 40.333333333333336,
+                "Shieldwalling", 75.66666666666667
+        );
+        Map<String, Double> received3 = new Collecting().averageScoresPerTask(historyResults(new Random(853)));
+        assertMapEquals(expected3, received3);
+        Map<String, Double> expected4 = Map.of("Phalanxing", 44.0,
+                "Tercioing", 47.333333333333336,
+                "Wedging", 33.333333333333336,
+                "Shieldwalling", 83.0
+        );
+        Map<String, Double> received4 = new Collecting().averageScoresPerTask(historyResults(new Random(753)));
+        assertMapEquals(expected4, received4);
+    }
 
     @Test
     public void testDefineMarks() {
