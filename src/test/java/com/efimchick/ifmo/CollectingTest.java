@@ -137,6 +137,7 @@ public class CollectingTest {
     }
 
     public void assertMapEquals(Map<String, Double> expected, Map<String, Double> actual) {
+        assertEquals("Map sizes don't match!", expected.size(), actual.size());
         for (String key: expected.keySet()) {
             assertEquals("problem with task " + key, expected.get(key), actual.get(key), 0.0001);
         }
