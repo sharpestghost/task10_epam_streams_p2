@@ -16,7 +16,7 @@ Implement [Collecting](src/main/java/com/efimchick/ifmo/Collecting.java) methods
 | Method | Description |
 | --- | --- |
 | *totalScores* | Return map of persons to their total scores (as average). | 
-| *averageTotalScore* | Return average result of all persons |
+| *averageTotalScore* | Return average result of all persons <br/>(be sure to consider all tasks of the course and not just those that were completed by a particular student) |
 | *averageScoresPerTask* | Return map of average results per tasks |
 | *defineMarks* | Return map of person to their marks:<br/> - *A* - total score in (90; 100]<br/> - *B* - total score in [83; 90]<br/> - *C* - total score in [75; 83)<br/> - *D* - total score in [68; 75)<br/> - *E* - total score in [60; 68)<br/> - *F* - total score < 60<br/> |
 | *easiestTask* | Return the task with highest average score |
