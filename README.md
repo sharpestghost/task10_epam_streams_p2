@@ -22,6 +22,8 @@ Implement [Collecting](src/main/java/com/efimchick/ifmo/Collecting.java) methods
 | *easiestTask* | Return the task with highest average score |
 | *printableStringCollector* | Return a collector that forms a special printable String as described below. |
 
+**Important**: Count average values including tasks that a student did not try to solve (with 0 score). See the Printable String Spec example.
+
 #### Printable String spec
 A multiline String containing a formatted table of all results and total values and marks.\
 Headers are required.\
