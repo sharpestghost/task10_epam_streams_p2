@@ -23,14 +23,22 @@ public class Person {
         return lastName;
     }
 
+    public String getFullName() {
+        return String.format("%-18s", (getLastName() + " " + getFirstName()));
+    }
+
     public int getAge() {
         return age;
     }
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         final Person person = (Person) o;
         return age == person.age &&
                 Objects.equals(firstName, person.firstName) &&

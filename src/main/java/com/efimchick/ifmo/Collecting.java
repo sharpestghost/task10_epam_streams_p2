@@ -11,7 +11,8 @@ import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.StringJoiner;
+import java.util.TreeMap;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -25,8 +26,7 @@ public final class Collecting {
     private static final int C_GRADE_SCORE = 75;
     private static final int D_GRADE_SCORE = 68;
     private static final int E_GRADE_SCORE = 60;
-
-    public Collecting() { }
+    private final Map<String, List<Integer>> header = new TreeMap<>();
 
     //### Integer Streams
     public int production(IntStream limit) {
@@ -100,6 +100,7 @@ public final class Collecting {
         return taskResultsMap;
     }
 
+
     private int getTaskCount(CourseResult[] programmingResults) {
         return getAllExamResults(programmingResults).size();
     }
@@ -123,7 +124,28 @@ public final class Collecting {
     }
 
     //### Printable String
-    public Collector<? super CourseResult, ?, ?> printableStringCollector() {
-        return null;
+    public Collector<CourseResult, ?, ?> printableStringCollector() {
+        //Map<String, List<Integer>> header = new TreeMap<>();
+
+        return Collector.of(() -> new StringJoiner("\n"),
+                (StringJoiner j, CourseResult c) ->
+                        j.add(kekw(c)),  // accumulator
+                StringJoiner::merge,     // combiner
+                (StringJoiner j) -> header.keySet().stream().collect(Collectors.joining(" | ","Student |","| Mark"))
+                        );
+    }
+
+    private String kekw(CourseResult result) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(result.getPerson().getFullName()).append(" |  ");
+        result.getTaskResults().forEach((String key, Integer value) -> {
+            if (!header.containsKey(key)) {
+                header.put(key, new ArrayList<>());
+            }
+            header.get(key).add(value);
+            sb.append(value).append("  |       ");
+        }
+        );
+        return sb.toString();
     }
 }
