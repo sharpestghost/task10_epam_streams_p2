@@ -4,15 +4,17 @@ import com.efimchick.ifmo.util.CourseResult;
 import com.efimchick.ifmo.util.Person;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,7 +28,7 @@ public final class Collecting {
     private static final int C_GRADE_SCORE = 75;
     private static final int D_GRADE_SCORE = 68;
     private static final int E_GRADE_SCORE = 60;
-    private final Map<String, List<Integer>> header = new TreeMap<>();
+    private static final String RESULT_SEPARATOR = " | ";
 
     //### Integer Streams
     public int production(IntStream limit) {
@@ -52,10 +54,11 @@ public final class Collecting {
     //### Course Result Streams (main methods)
     public Map<Person, Double> totalScores(Stream<CourseResult> programmingResults) {
         Map<Person, Double> scoreMap = new HashMap<>();
-        CourseResult[] courseResults = programmingResults.toArray(CourseResult[]::new);
-        int taskCount = getTaskCount(courseResults);
-        Arrays.stream(courseResults).forEach(courseResult -> scoreMap.put(courseResult.getPerson(),
-                courseResult.getTotalResults() / taskCount));
+        Set<String> taskList = new TreeSet<>();
+        //list of tasks is selected, then the total and average score for each student is found
+        programmingResults.peek(courseResult -> taskList.addAll(courseResult.getTaskList())).
+                collect(Collectors.toList()).forEach(courseResult -> scoreMap.put(courseResult.getPerson(),
+                courseResult.getTotalResults() / taskList.size()));
         return scoreMap;
     }
 
@@ -66,12 +69,20 @@ public final class Collecting {
     }
 
     public Map<String, Double> averageScoresPerTask(Stream<CourseResult> programmingResults) {
-        CourseResult[] courseResults = programmingResults.toArray(CourseResult[]::new);
-        Map<String, Double> averageScoresMap = new HashMap<>();
-        Map<String, List<Integer>> examResults = getAllExamResults(courseResults);
-        examResults.forEach((key, value) -> averageScoresMap.put(key, value.stream()
-                .mapToDouble(a -> a).sum() / courseResults.length));
-        return averageScoresMap;
+        AtomicInteger studentCount = new AtomicInteger();
+        Map<String, List<Integer>> scoreMap = new TreeMap<>();
+        //filling map with tasks
+        programmingResults.peek((CourseResult courseResult) -> courseResult.getTaskResults().keySet().
+                forEach((String task) -> scoreMap.put(task, new ArrayList<>()))).collect(Collectors.toList()).
+        //filling map with scores for each task
+                forEach((CourseResult courseResult) -> {
+                    courseResult.getTaskResults().
+                            forEach((String task, Integer score) -> scoreMap.get(task).add(score));
+                    studentCount.getAndIncrement();
+                });
+        //return map with average score per task
+        return scoreMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                entry -> entry.getValue().stream().mapToDouble(a -> a).sum() / studentCount.get()));
     }
 
     public String easiestTask(Stream<CourseResult> programmingResults) {
@@ -86,25 +97,6 @@ public final class Collecting {
     }
 
     //### Course Result Streams (auxiliary methods)
-    private Map<String,List<Integer>> getAllExamResults(CourseResult[] programmingResults) {
-        Map<String,List<Integer>> taskResultsMap = new HashMap<>();
-        Arrays.stream(programmingResults).forEach((CourseResult courseResult) -> {
-            Map<String, Integer> taskResultsByStudent = courseResult.getTaskResults();
-            taskResultsByStudent.forEach((String task, Integer taskResult) -> {
-                if (!taskResultsMap.containsKey(task)) {
-                    taskResultsMap.put(task, new ArrayList<>());
-                }
-                taskResultsMap.get(task).add(taskResult);
-            });
-        });
-        return taskResultsMap;
-    }
-
-
-    private int getTaskCount(CourseResult[] programmingResults) {
-        return getAllExamResults(programmingResults).size();
-    }
-
     private String getGrade(Double value) {
         String grade;
         if (value > A_GRADE_SCORE) {
@@ -123,28 +115,20 @@ public final class Collecting {
         return grade;
     }
 
-    //### Printable String
-    public Collector<CourseResult, ?, ?> printableStringCollector() {
-        //Map<String, List<Integer>> header = new TreeMap<>();
-
+    //### Printable String (not completed)
+    public Collector<CourseResult, StringJoiner, String> printableStringCollector() {
         return Collector.of(() -> new StringJoiner("\n"),
-                (StringJoiner j, CourseResult c) ->
-                        j.add(kekw(c)),  // accumulator
+                (StringJoiner joiner, CourseResult courseResult) ->
+                        joiner.add(formatStudentResults(courseResult)),  // accumulator
                 StringJoiner::merge,     // combiner
-                (StringJoiner j) -> header.keySet().stream().collect(Collectors.joining(" | ","Student |","| Mark"))
-                        );
+                StringJoiner::toString);
     }
 
-    private String kekw(CourseResult result) {
+    private String formatStudentResults(CourseResult result) {
         StringBuilder sb = new StringBuilder();
-        sb.append(result.getPerson().getFullName()).append(" |  ");
-        result.getTaskResults().forEach((String key, Integer value) -> {
-            if (!header.containsKey(key)) {
-                header.put(key, new ArrayList<>());
-            }
-            header.get(key).add(value);
-            sb.append(value).append("  |       ");
-        }
+        sb.append(result.getPerson().getFullName()).append(RESULT_SEPARATOR);
+        result.getTaskResults().forEach((String key, Integer value) ->
+            sb.append(value).append(RESULT_SEPARATOR)
         );
         return sb.toString();
     }
