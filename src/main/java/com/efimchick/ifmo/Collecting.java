@@ -55,9 +55,10 @@ public final class Collecting {
     public Map<Person, Double> totalScores(Stream<CourseResult> programmingResults) {
         Map<Person, Double> scoreMap = new HashMap<>();
         Set<String> taskList = new TreeSet<>();
+        List<CourseResult> courseResultList = programmingResults.collect(Collectors.toList());
         //list of tasks is selected, then the total and average score for each student is found
-        programmingResults.peek(courseResult -> taskList.addAll(courseResult.getTaskList())).
-                collect(Collectors.toList()).forEach(courseResult -> scoreMap.put(courseResult.getPerson(),
+        courseResultList.forEach(courseResult -> taskList.addAll(courseResult.getTaskList()));
+        courseResultList.forEach(courseResult -> scoreMap.put(courseResult.getPerson(),
                 courseResult.getTotalResults() / taskList.size()));
         return scoreMap;
     }
@@ -71,15 +72,16 @@ public final class Collecting {
     public Map<String, Double> averageScoresPerTask(Stream<CourseResult> programmingResults) {
         AtomicInteger studentCount = new AtomicInteger();
         Map<String, List<Integer>> scoreMap = new TreeMap<>();
+        List<CourseResult> courseResultList = programmingResults.collect(Collectors.toList());
         //filling map with tasks
-        programmingResults.peek((CourseResult courseResult) -> courseResult.getTaskResults().keySet().
-                forEach((String task) -> scoreMap.put(task, new ArrayList<>()))).collect(Collectors.toList()).
+        courseResultList.forEach((CourseResult courseResult) -> courseResult.getTaskResults().keySet().
+                forEach((String task) -> scoreMap.put(task, new ArrayList<>())));
         //filling map with scores for each task
-                forEach((CourseResult courseResult) -> {
-                    courseResult.getTaskResults().
-                            forEach((String task, Integer score) -> scoreMap.get(task).add(score));
-                    studentCount.getAndIncrement();
-                });
+        courseResultList.forEach((CourseResult courseResult) -> {
+            courseResult.getTaskResults().
+                    forEach((String task, Integer score) -> scoreMap.get(task).add(score));
+            studentCount.getAndIncrement();
+        });
         //return map with average score per task
         return scoreMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                 entry -> entry.getValue().stream().mapToDouble(a -> a).sum() / studentCount.get()));
