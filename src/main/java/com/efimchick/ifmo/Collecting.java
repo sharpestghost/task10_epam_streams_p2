@@ -70,21 +70,17 @@ public final class Collecting {
     }
 
     public Map<String, Double> averageScoresPerTask(Stream<CourseResult> programmingResults) {
-        AtomicInteger studentCount = new AtomicInteger();
         Map<String, List<Integer>> scoreMap = new TreeMap<>();
         List<CourseResult> courseResultList = programmingResults.collect(Collectors.toList());
         //filling map with tasks
         courseResultList.forEach((CourseResult courseResult) -> courseResult.getTaskResults().keySet().
                 forEach((String task) -> scoreMap.put(task, new ArrayList<>())));
         //filling map with scores for each task
-        courseResultList.forEach((CourseResult courseResult) -> {
-            courseResult.getTaskResults().
-                    forEach((String task, Integer score) -> scoreMap.get(task).add(score));
-            studentCount.getAndIncrement();
-        });
+        courseResultList.forEach((CourseResult courseResult) ->
+                courseResult.getTaskResults().forEach((String task, Integer score) -> scoreMap.get(task).add(score)));
         //return map with average score per task
         return scoreMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-                entry -> entry.getValue().stream().mapToDouble(a -> a).sum() / studentCount.get()));
+                entry -> entry.getValue().stream().mapToDouble(a -> a).sum() / courseResultList.size()));
     }
 
     public String easiestTask(Stream<CourseResult> programmingResults) {
